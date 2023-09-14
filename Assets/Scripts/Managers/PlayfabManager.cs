@@ -24,8 +24,8 @@ public class PlayfabManager : MonoBehaviour
     {
         var androidRequest = new LoginWithAndroidDeviceIDRequest
         {
-            //AndroidDeviceId = SystemInfo.deviceUniqueIdentifier,
-            AndroidDeviceId = idNumber,
+            AndroidDeviceId = SystemInfo.deviceUniqueIdentifier,
+            //AndroidDeviceId = idNumber,
             CreateAccount = true
         };
         PlayFabClientAPI.LoginWithAndroidDeviceID(androidRequest, Onsucess, OnError);

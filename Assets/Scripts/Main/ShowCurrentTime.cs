@@ -10,6 +10,7 @@ public class ShowCurrentTime : MonoBehaviour
     [SerializeField] TextMeshProUGUI currentTimeLabel;
     [SerializeField] TextMeshProUGUI nextRewardText;
     [SerializeField] TextMeshProUGUI nextExtraCoinsText;
+    [SerializeField] PlayfabManager playfabManager;
     [SerializeField] int timeForReward;
 
     private void Start()
@@ -22,6 +23,11 @@ public class ShowCurrentTime : MonoBehaviour
     {
         currentTimeLabel.text = TimerUtility.CurrentTime.ToString("F");
         TimeSpan timeRemaining = GetTimeUntilNext1300UTC();
+        if (timeRemaining == TimeSpan.Zero)
+        {
+            playfabManager.ResetAll();
+        }
+
         nextRewardText.text = $"Next reward: {timeRemaining.Hours}:{timeRemaining.Minutes}:{timeRemaining.Seconds}";
         nextExtraCoinsText.text = $"Next reward: {timeRemaining.Hours}:{timeRemaining.Minutes}:{timeRemaining.Seconds}";
     }
@@ -48,12 +54,15 @@ public class ShowCurrentTime : MonoBehaviour
         DateTime currentTime = DateTime.UtcNow;
         DateTime targetTime = new DateTime(currentTime.Year, currentTime.Month, currentTime.Day, timeForReward, 0, 0, DateTimeKind.Utc);
 
+        
         if (currentTime >= targetTime)
         {
             targetTime = targetTime.AddDays(1);
         }
-
+ 
         return targetTime - currentTime;
     }
+
+    
 
 }

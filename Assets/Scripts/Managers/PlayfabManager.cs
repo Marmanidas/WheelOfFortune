@@ -5,6 +5,7 @@ using PlayFab;
 using PlayFab.ClientModels;
 using UnityEditor.PackageManager;
 using UnityEditor.Search;
+using System;
 
 public class PlayfabManager : MonoBehaviour
 {
@@ -52,35 +53,47 @@ public class PlayfabManager : MonoBehaviour
     {
         if (result.Data != null)
         {
-            if (result.Data.ContainsKey("TakeGift"))
-            {
-                UsedReward = bool.Parse(result.Data["TakeGift"].Value);
-            }
-
-            Gamemanager.instance.EnableDailyRewardButton(UsedReward);
-
-            if (Gamemanager.instance.GetReward == false)
-            {
-                SaveGift(false);
-            }
+            
             if (result.Data.ContainsKey("Day"))
             {
                 Gamemanager.instance.SaveDay = int.Parse(result.Data["Day"].Value);
             }
+            else { 
+                Gamemanager.instance.EnableButtonFirsTime(1);
+                SaveDay(TimerUtility.CurrentTime.Day);
+            }
+
+
+            if (result.Data.ContainsKey("TakeGift"))
+            {
+                UsedReward = bool.Parse(result.Data["TakeGift"].Value);
+                if (Gamemanager.instance.SaveDay != TimerUtility.CurrentTime.Day)
+                {
+                    UsedReward = false;
+                    SaveGift(UsedReward);
+                }
+                Gamemanager.instance.EnableDailyRewardButton(UsedReward);
+            }
+            else
+            {
+                Gamemanager.instance.GetReward = true;
+                Gamemanager.instance.EnableDailyRewardButton(false);
+            }
+
             if (result.Data.ContainsKey("Extra_Coins"))
             {
                 if (Gamemanager.instance.GetReward == true && Gamemanager.instance.SaveDay != Gamemanager.instance.ThisDay)
                 {
-                    SaveDay(TimerUtility.CurrentTime.Day);
                     Gamemanager.instance.ExtracoinsAmount = 0;
+                    Gamemanager.instance.EnableDisableExtraCoinButton();
                     AddExtraCoins();
                     return;
                 }
                 Gamemanager.instance.AddExtraCoin(int.Parse(result.Data["Extra_Coins"].Value));
             }
-            else { Gamemanager.instance.EnableExtraCoinButtonFirsTime();}
+            else { Gamemanager.instance.EnableButtonFirsTime(1); }
 
-               
+
         }
     }
 
@@ -105,7 +118,7 @@ public class PlayfabManager : MonoBehaviour
             VirtualCurrency = "CO",
             Amount = amount
         };
-        PlayFabClientAPI.SubtractUserVirtualCurrency(request, result => SubtractedCoin(result, amount) , OnError);
+        PlayFabClientAPI.SubtractUserVirtualCurrency(request, result => SubtractedCoin(result, amount), OnError);
     }
 
     void SubtractedCoin(ModifyUserVirtualCurrencyResult result, int amount)
@@ -124,7 +137,7 @@ public class PlayfabManager : MonoBehaviour
             VirtualCurrency = "CO",
             Amount = amount
         };
-        PlayFabClientAPI.AddUserVirtualCurrency(request, result => GiftObtained (result, isGift), OnError);
+        PlayFabClientAPI.AddUserVirtualCurrency(request, result => GiftObtained(result, isGift), OnError);
     }
     void GiftObtained(ModifyUserVirtualCurrencyResult result, bool isDdailyGift)
     {
@@ -175,6 +188,7 @@ public class PlayfabManager : MonoBehaviour
 
     void CoinTaken(UpdateUserDataResult resultado)
     {
+        SaveDay(TimerUtility.CurrentTime.Day);
         Debug.Log("Extra coin added");
     }
 
@@ -188,7 +202,7 @@ public class PlayfabManager : MonoBehaviour
             }
         };
 
-        PlayFabClientAPI.UpdateUserData(request, result => DaySaved (result, day), OnError);
+        PlayFabClientAPI.UpdateUserData(request, result => DaySaved(result, day), OnError);
     }
 
     void DaySaved(UpdateUserDataResult result, int day)
@@ -196,9 +210,19 @@ public class PlayfabManager : MonoBehaviour
         Debug.Log("Day saved");
     }
 
-  
 
     #endregion
+
+    public void ResetAll()
+    {
+        UsedReward = false;
+        SaveGift(UsedReward);
+        Gamemanager.instance.ExtracoinsAmount = 0;
+        Gamemanager.instance.EnableDisableExtraCoinButton();
+        AddExtraCoins();
+        Gamemanager.instance.EnableButtonFirsTime(1);
+        Gamemanager.instance.EnableButtonFirsTime(2);
+    }
 
     void OnError(PlayFabError error)
     {

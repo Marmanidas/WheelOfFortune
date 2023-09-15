@@ -108,9 +108,9 @@ public class Gamemanager : MonoBehaviour
         gameButtons[2].interactable = dailyreWardButton;
     }
 
-    public void EnableExtraCoinButtonFirsTime()
+    public void EnableButtonFirsTime(int button)
     {
-        gameButtons[1].interactable = true;
+        gameButtons[button].interactable = true;
     }
 
     public void EnableDisableExtraCoinButton()

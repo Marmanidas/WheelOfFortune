@@ -4126,7 +4126,7 @@ MonoBehaviour:
   currentTimeLabel: {fileID: 2095654902}
   nextRewardText: {fileID: 191301503}
   nextExtraCoinsText: {fileID: 740462371}
-  timeForReward: 13
+  timeForReward: 12
 --- !u!1 &2108290757
 GameObject:
   m_ObjectHideFlags: 0
